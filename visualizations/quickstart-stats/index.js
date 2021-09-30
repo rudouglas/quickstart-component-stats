@@ -481,7 +481,7 @@ export default class QuickstartStatsVisualization extends React.Component {
               <GridItem columnSpan="3">
                 <Card>
                   <CardHeader>
-                    <h1>Scenario #2</h1>
+                    <h1>Scenario #4</h1>
                   </CardHeader>
                   <CardBody>
                     <Grid
