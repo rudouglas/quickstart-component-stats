@@ -1,4 +1,12 @@
 import React from "react";
+import PropTypes from "prop-types";
+import {
+  Radar,
+  RadarChart,
+  PolarGrid,
+  PolarAngleAxis,
+  PolarRadiusAxis,
+} from "recharts";
 import {
   NerdGraphQuery,
   Card,
@@ -24,57 +32,94 @@ import {
   List,
   ListItem,
 } from "nr1";
+import ComponentStats from "../../nerdlets/component-stats/ComponentStats";
 
-export default class ComponentStats extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      quickstarts: {},
-    };
-    nerdlet.setConfig({
-      timePicker: false,
-    });
-  }
+export default class QuickstartStatsVisualization extends React.Component {
+  // Custom props you wish to be configurable in the UI must also be defined in
+  // the nr1.json file for the visualization. See docs for more details.
+  static propTypes = {
+    /**
+     * A fill color to override the default fill color. This is an example of
+     * a custom chart configuration.
+     */
+    fill: PropTypes.string,
+
+    /**
+     * A stroke color to override the default stroke color. This is an example of
+     * a custom chart configuration.
+     */
+    stroke: PropTypes.string,
+    /**
+     * An array of objects consisting of a nrql `query` and `accountId`.
+     * This should be a standard prop for any NRQL based visualizations.
+     */
+    nrqlQueries: PropTypes.arrayOf(
+      PropTypes.shape({
+        accountId: PropTypes.number,
+        query: PropTypes.string,
+      })
+    ),
+  };
+
+  /**
+   * Restructure the data for a non-time-series, facet-based NRQL query into a
+   * form accepted by the Recharts library's RadarChart.
+   * (https://recharts.org/api/RadarChart).
+   */
+  transformData = (rawData) => {
+    return rawData.map((entry) => ({
+      name: entry.metadata.name,
+      // Only grabbing the first data value because this is not time-series data.
+      value: entry.data[0].y,
+    }));
+  };
+
+  /**
+   * Format the given axis tick's numeric value into a string for display.
+   */
+  formatTick = (value) => {
+    return value.toLocaleString();
+  };
 
   render() {
     const query = ngql`
-    {
-      docs {
-        openInstallation {
-          quickstartSearch {
-            count
-            nextCursor
-            results {
-              quickstarts {
-                id
-                dashboards {
-                  id
-                  name
-                }
-                alerts {
-                  id
-                  name
-                }
-                authors
-                documentation {
-                  name
-                }
-                installPlans {
-                  name
-                  install {
-                    mode
+        {
+          docs {
+            openInstallation {
+              quickstartSearch {
+                count
+                nextCursor
+                results {
+                  quickstarts {
+                    id
+                    dashboards {
+                      id
+                      name
+                    }
+                    alerts {
+                      id
+                      name
+                    }
+                    authors
+                    documentation {
+                      name
+                    }
+                    installPlans {
+                      name
+                      install {
+                        mode
+                      }
+                    }
+                    level
+                    name
+                    packUrl
                   }
                 }
-                level
-                name
-                packUrl
               }
             }
           }
         }
-      }
-    }
-    `;
+        `;
     return (
       <NerdGraphQuery query={query}>
         {({ loading, error, data }) => {
@@ -550,3 +595,37 @@ export default class ComponentStats extends React.Component {
     );
   }
 }
+
+const EmptyState = () => (
+  <Card className="EmptyState">
+    <CardBody className="EmptyState-cardBody">
+      <HeadingText
+        spacingType={[HeadingText.SPACING_TYPE.LARGE]}
+        type={HeadingText.TYPE.HEADING_3}
+      >
+        Please provide at least one query & account ID pair
+      </HeadingText>
+      <HeadingText
+        spacingType={[HeadingText.SPACING_TYPE.MEDIUM]}
+        type={HeadingText.TYPE.HEADING_4}
+      >
+        An example NRQL query you can try is:
+      </HeadingText>
+      <code>FROM NrUsage SELECT sum(usage) FACET metric SINCE 1 week ago</code>
+    </CardBody>
+  </Card>
+);
+
+const ErrorState = () => (
+  <Card className="ErrorState">
+    <CardBody className="ErrorState-cardBody">
+      <HeadingText
+        className="ErrorState-headingText"
+        spacingType={[HeadingText.SPACING_TYPE.LARGE]}
+        type={HeadingText.TYPE.HEADING_3}
+      >
+        Oops! Something went wrong.
+      </HeadingText>
+    </CardBody>
+  </Card>
+);

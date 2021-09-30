@@ -1,0 +1,40 @@
+.nr1-dd71167c-4602-490b-9e04-3e61d43e99a2 .my-nerdlet{
+  outline:1px solid #000; }
+
+.nr1-dd71167c-4602-490b-9e04-3e61d43e99a2 .checkmark{
+  border-radius:50%;
+  stroke-width:2;
+  stroke:green;
+  stroke-miterlimit:10;
+  stroke-dashoffset:0; }
+
+.nr1-dd71167c-4602-490b-9e04-3e61d43e99a2 .checkmark,.nr1-dd71167c-4602-490b-9e04-3e61d43e99a2 .invalid-x{
+  width:40px;
+  height:40px;
+  display:block;
+  margin:10% auto; }
+
+.nr1-dd71167c-4602-490b-9e04-3e61d43e99a2 .invalid-x{
+  stroke:red;
+  fill:transparent;
+  stroke-linecap:round;
+  stroke-width:5; }
+
+.nr1-dd71167c-4602-490b-9e04-3e61d43e99a2 .validation-grid{
+  height:200px; }
+
+.nr1-dd71167c-4602-490b-9e04-3e61d43e99a2 .EmptyState,.nr1-dd71167c-4602-490b-9e04-3e61d43e99a2 .ErrorState{
+  height:100%;
+  text-align:center; }
+  .nr1-dd71167c-4602-490b-9e04-3e61d43e99a2 .EmptyState-cardBody,.nr1-dd71167c-4602-490b-9e04-3e61d43e99a2 .ErrorState-cardBody{
+    height:100%;
+    box-sizing:border-box;
+    display:flex;
+    flex-direction:column;
+    justify-content:center; }
+
+.nr1-dd71167c-4602-490b-9e04-3e61d43e99a2 .ErrorState-headingText{
+  color:#a9a9a9; }
+
+
+/*# sourceMappingURL=dd71167c-4602-490b-9e04-3e61d43e99a2--styles~585f4efa.css.map*/
