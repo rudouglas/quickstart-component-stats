@@ -149,7 +149,7 @@ export default class ComponentStats extends React.Component {
               <GridItem columnSpan="3">
                 <Card>
                   <CardHeader>
-                    <h1>Scenario #1</h1>
+                    <h1>Full QS</h1>
                   </CardHeader>
                   <CardBody>
                     <Grid
@@ -237,7 +237,7 @@ export default class ComponentStats extends React.Component {
               <GridItem columnSpan="3">
                 <Card>
                   <CardHeader>
-                    <h1>Scenario #2</h1>
+                    <h1>Full QS w / No install</h1>
                   </CardHeader>
                   <CardBody>
                     <Grid
@@ -348,7 +348,7 @@ export default class ComponentStats extends React.Component {
               <GridItem columnSpan="3">
                 <Card>
                   <CardHeader>
-                    <h1>Scenario #3</h1>
+                    <h1>Install only QS</h1>
                   </CardHeader>
                   <CardBody>
                     <Grid
@@ -436,7 +436,7 @@ export default class ComponentStats extends React.Component {
               <GridItem columnSpan="3">
                 <Card>
                   <CardHeader>
-                    <h1>Scenario #4</h1>
+                    <h1>Docs only QS</h1>
                   </CardHeader>
                   <CardBody>
                     <Grid
