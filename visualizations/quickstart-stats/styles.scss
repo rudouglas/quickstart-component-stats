@@ -15,3 +15,34 @@
 .ErrorState-headingText {
     color: darkgrey;
 }
+
+.totalCount {
+    margin: 10px;
+}
+
+.checkmark {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: block;
+    stroke-width: 2;
+    stroke: green;
+    stroke-miterlimit: 10;
+    stroke-dashoffset: 0;
+    margin: 10% auto;
+  }
+  
+  .invalid-x {
+    width: 40px;
+    height: 40px;
+    display: block;
+    stroke: red;
+    fill: transparent;
+    stroke-linecap: round;
+    stroke-width: 5;
+    margin: 10% auto;
+  }
+  
+  .validation-grid {
+    height: 200px;
+  }

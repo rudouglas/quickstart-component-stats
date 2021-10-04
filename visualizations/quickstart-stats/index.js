@@ -12,6 +12,7 @@ import {
   Card,
   CardHeader,
   CardBody,
+  Badge,
   Grid,
   GridItem,
   nerdlet,
@@ -23,17 +24,12 @@ import {
   Button,
   CardSection,
   CardSectionHeader,
-  Dropdown,
-  DropdownItem,
-  CardSectionBody,
-  Badge,
-  Icon,
-  Link,
-  List,
-  ListItem,
+  BarChart,
+  NrqlQuery,
 } from "nr1";
 import ComponentStats from "../../nerdlets/component-stats/ComponentStats";
 
+const TESSEN_ACCOUNT_ID = 1002319;
 export default class QuickstartStatsVisualization extends React.Component {
   // Custom props you wish to be configurable in the UI must also be defined in
   // the nr1.json file for the visualization. See docs for more details.
@@ -81,6 +77,75 @@ export default class QuickstartStatsVisualization extends React.Component {
     return value.toLocaleString();
   };
 
+  xLogo = () => {
+    return (
+      <GridItem columnSpan={2}>
+        {" "}
+        <svg
+          class="invalid-x"
+          xmlns="http://www.w3.org/2000/svg"
+          viewbox="0 0 40 40"
+        >
+          <path class="close-x" d="M 10,10 L 30,30 M 30,10 L 10,30" />
+        </svg>
+      </GridItem>
+    );
+  };
+
+  checkLogo = () => {
+    return (
+      <GridItem columnSpan={2}>
+        {" "}
+        <svg
+          class="checkmark"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 40 40"
+        >
+          <path
+            class="checkmark__check"
+            fill="none"
+            d="M14.1 27.2l7.1 7.2 16.7-16.8"
+          />
+        </svg>
+      </GridItem>
+    );
+  };
+
+  mostClicked = (quickstarts) => {
+    const ids = quickstarts.map((qs) => {
+      return qs.id
+    })
+    const idString = ids.reduce((acc, id) => {
+      acc += ','
+      return acc += `'${id}'`
+    }, "")
+    const nrql = "FROM TessenAction SELECT count(*) AS 'TOP 10 (INTERNAL)' WHERE listingId IN (" 
+      + idString.substring(1,) + ") AND eventName = 'DEVEX_New Relic IO_listingClicked' AND listingType = 'quickstart' facet listingName SINCE '2021-09-29 00:00:00+0100' LIMIT 10"
+    console.log(nrql)
+    return (
+      <NrqlQuery
+        accountId={TESSEN_ACCOUNT_ID}
+        query={nrql}
+      >
+        {({ data }) => {
+          let filtered;
+          if (data) {
+            // change colors to a nice pink.
+            console.log(data)
+            console.log(`yes`)
+            filtered = data.filter(({ metadata }) => (metadata.name !== "Other"))
+          }
+
+          return (
+            <BarChart
+              accountId={TESSEN_ACCOUNT_ID}
+              data={filtered}
+            />
+          );
+        }}
+      </NrqlQuery>
+    );
+  };
   render() {
     const query = ngql`
         {
@@ -113,6 +178,7 @@ export default class QuickstartStatsVisualization extends React.Component {
                     level
                     name
                     packUrl
+                    title
                   }
                 }
               }
@@ -191,10 +257,16 @@ export default class QuickstartStatsVisualization extends React.Component {
           console.log(scenarioOne);
           return (
             <Grid>
+              <GridItem columnSpan="12">
+                <h1 className="totalCount">
+                  Total: {quickstarts.length} quickstarts
+                </h1>
+                <CardSection></CardSection>
+              </GridItem>
               <GridItem columnSpan="3">
                 <Card>
                   <CardHeader>
-                    <h1>Scenario #1</h1>
+                    <h1>Full QS</h1>
                   </CardHeader>
                   <CardBody>
                     <Grid
@@ -206,20 +278,7 @@ export default class QuickstartStatsVisualization extends React.Component {
                       gapType={Grid.GAP_TYPE.SMALL}
                       className="validation-grid"
                     >
-                      <GridItem columnSpan={2}>
-                        {" "}
-                        <svg
-                          class="checkmark"
-                          xmlns="http://www.w3.org/2000/svg"
-                          viewBox="0 0 40 40"
-                        >
-                          <path
-                            class="checkmark__check"
-                            fill="none"
-                            d="M14.1 27.2l7.1 7.2 16.7-16.8"
-                          />
-                        </svg>
-                      </GridItem>
+                      {this.checkLogo()}
                       <GridItem columnSpan={10}>
                         <h2
                           style={{
@@ -230,20 +289,7 @@ export default class QuickstartStatsVisualization extends React.Component {
                           Dashboards/Alerts
                         </h2>
                       </GridItem>
-                      <GridItem columnSpan={2}>
-                        {" "}
-                        <svg
-                          class="checkmark"
-                          xmlns="http://www.w3.org/2000/svg"
-                          viewBox="0 0 40 40"
-                        >
-                          <path
-                            class="checkmark__check"
-                            fill="none"
-                            d="M14.1 27.2l7.1 7.2 16.7-16.8"
-                          />
-                        </svg>
-                      </GridItem>
+                      {this.checkLogo()}
                       <GridItem columnSpan={10}>
                         <h2
                           style={{
@@ -258,31 +304,21 @@ export default class QuickstartStatsVisualization extends React.Component {
                     <CardSection>
                       <CardSectionHeader>
                         <h1>{scenarioOne.length} Quickstarts</h1>
-                        <h4>{scenarioOneNr.length} with author New Relic</h4>
+                        <h4>
+                          {scenarioOneNr.length} with author{" "}
+                          <Badge type={Badge.TYPE.INFO}>New Relic</Badge>
+                        </h4>
                       </CardSectionHeader>
-                      <CardSectionBody>
-                        <Card collapsible collapsed>
-                          <CardHeader title="See All" />
-                          <CardBody>
-                            <List>
-                              {scenarioOne.map((qs) => (
-                                <ListItem>
-                                  <Link to={qs.packUrl}>{qs.name}</Link>
-                                </ListItem>
-                              ))}
-                            </List>
-                          </CardBody>
-                        </Card>
-                      </CardSectionBody>
                     </CardSection>
                     <CardSection></CardSection>
+                    {this.mostClicked(scenarioOne)}
                   </CardBody>
                 </Card>
               </GridItem>
               <GridItem columnSpan="3">
                 <Card>
                   <CardHeader>
-                    <h1>Scenario #2</h1>
+                    <h1>Full QS w / No install</h1>
                   </CardHeader>
                   <CardBody>
                     <Grid
@@ -294,20 +330,7 @@ export default class QuickstartStatsVisualization extends React.Component {
                       gapType={Grid.GAP_TYPE.SMALL}
                       className="validation-grid"
                     >
-                      <GridItem columnSpan={2}>
-                        {" "}
-                        <svg
-                          class="checkmark"
-                          xmlns="http://www.w3.org/2000/svg"
-                          viewBox="0 0 40 40"
-                        >
-                          <path
-                            class="checkmark__check"
-                            fill="none"
-                            d="M14.1 27.2l7.1 7.2 16.7-16.8"
-                          />
-                        </svg>
-                      </GridItem>
+                      {this.checkLogo()}
                       <GridItem columnSpan={10}>
                         <h2
                           style={{
@@ -318,43 +341,7 @@ export default class QuickstartStatsVisualization extends React.Component {
                           Dashboards/Alerts
                         </h2>
                       </GridItem>
-                      <GridItem columnSpan={2}>
-                        {" "}
-                        <svg
-                          class="invalid-x"
-                          xmlns="http://www.w3.org/2000/svg"
-                          viewbox="0 0 40 40"
-                        >
-                          <path
-                            class="close-x"
-                            d="M 10,10 L 30,30 M 30,10 L 10,30"
-                          />
-                        </svg>
-                      </GridItem>
-                      <GridItem columnSpan={10}>
-                        <h2
-                          style={{
-                            color: "#017C86",
-                            fontWeight: 500,
-                          }}
-                        >
-                          Targeted Install
-                        </h2>
-                      </GridItem>
-                      <GridItem columnSpan={2}>
-                        {" "}
-                        <svg
-                          class="checkmark"
-                          xmlns="http://www.w3.org/2000/svg"
-                          viewBox="0 0 40 40"
-                        >
-                          <path
-                            class="checkmark__check"
-                            fill="none"
-                            d="M14.1 27.2l7.1 7.2 16.7-16.8"
-                          />
-                        </svg>
-                      </GridItem>
+                      {this.checkLogo()}
                       <GridItem columnSpan={10}>
                         <h2
                           style={{
@@ -365,35 +352,36 @@ export default class QuickstartStatsVisualization extends React.Component {
                           Documentation Install
                         </h2>
                       </GridItem>
+                      {this.xLogo()}
+                      <GridItem columnSpan={10}>
+                        <h2
+                          style={{
+                            color: "#017C86",
+                            fontWeight: 500,
+                          }}
+                        >
+                          Targeted Install
+                        </h2>
+                      </GridItem>
                     </Grid>
                     <CardSection>
                       <CardSectionHeader>
                         <h1>{scenarioTwo.length} Quickstarts</h1>
-                        <h4>{scenarioTwoNr.length} with author New Relic</h4>
+                        <h4>
+                          {scenarioTwoNr.length} with author{" "}
+                          <Badge type={Badge.TYPE.INFO}>New Relic</Badge>
+                        </h4>
                       </CardSectionHeader>
-                      <CardSectionBody>
-                        <Card collapsible collapsed>
-                          <CardHeader title="See All" />
-                          <CardBody>
-                            <List>
-                              {scenarioTwo.map((qs) => (
-                                <ListItem>
-                                  <Link to={qs.packUrl}>{qs.name}</Link>
-                                </ListItem>
-                              ))}
-                            </List>
-                          </CardBody>
-                        </Card>
-                      </CardSectionBody>
                     </CardSection>
                     <CardSection></CardSection>
+                    {this.mostClicked(scenarioTwo)}
                   </CardBody>
                 </Card>
               </GridItem>
               <GridItem columnSpan="3">
                 <Card>
                   <CardHeader>
-                    <h1>Scenario #3</h1>
+                    <h1>Install only QS</h1>
                   </CardHeader>
                   <CardBody>
                     <Grid
@@ -405,19 +393,18 @@ export default class QuickstartStatsVisualization extends React.Component {
                       gapType={Grid.GAP_TYPE.SMALL}
                       className="validation-grid"
                     >
-                      <GridItem columnSpan={2}>
-                        {" "}
-                        <svg
-                          class="invalid-x"
-                          xmlns="http://www.w3.org/2000/svg"
-                          viewbox="0 0 40 40"
+                      {this.checkLogo()}
+                      <GridItem columnSpan={10}>
+                        <h2
+                          style={{
+                            color: "#017C86",
+                            fontWeight: 500,
+                          }}
                         >
-                          <path
-                            class="close-x"
-                            d="M 10,10 L 30,30 M 30,10 L 10,30"
-                          />
-                        </svg>
+                          Targeted Install
+                        </h2>
                       </GridItem>
+                      {this.xLogo()}
 
                       <GridItem columnSpan={10}>
                         <h2
@@ -429,59 +416,25 @@ export default class QuickstartStatsVisualization extends React.Component {
                           Dashboards/Alerts
                         </h2>
                       </GridItem>
-                      <GridItem columnSpan={2}>
-                        {" "}
-                        <svg
-                          class="checkmark"
-                          xmlns="http://www.w3.org/2000/svg"
-                          viewBox="0 0 40 40"
-                        >
-                          <path
-                            class="checkmark__check"
-                            fill="none"
-                            d="M14.1 27.2l7.1 7.2 16.7-16.8"
-                          />
-                        </svg>
-                      </GridItem>
-                      <GridItem columnSpan={10}>
-                        <h2
-                          style={{
-                            color: "#017C86",
-                            fontWeight: 500,
-                          }}
-                        >
-                          Targeted Install
-                        </h2>
-                      </GridItem>
                     </Grid>
                     <CardSection>
                       <CardSectionHeader>
                         <h1>{scenarioThree.length} Quickstarts</h1>
-                        <h4>{scenarioThreeNr.length} with author New Relic</h4>
+                        <h4>
+                          {scenarioThreeNr.length} with author{" "}
+                          <Badge type={Badge.TYPE.INFO}>New Relic</Badge>
+                        </h4>
                       </CardSectionHeader>
-                      <CardSectionBody>
-                        <Card collapsible collapsed>
-                          <CardHeader title="See All" />
-                          <CardBody>
-                            <List>
-                              {scenarioThree.map((qs) => (
-                                <ListItem>
-                                  <Link to={qs.packUrl}>{qs.name}</Link>
-                                </ListItem>
-                              ))}
-                            </List>
-                          </CardBody>
-                        </Card>
-                      </CardSectionBody>
                     </CardSection>
                     <CardSection></CardSection>
+                    {this.mostClicked(scenarioThree)}
                   </CardBody>
                 </Card>
               </GridItem>
               <GridItem columnSpan="3">
                 <Card>
                   <CardHeader>
-                    <h1>Scenario #4</h1>
+                    <h1>Docs only QS</h1>
                   </CardHeader>
                   <CardBody>
                     <Grid
@@ -493,66 +446,7 @@ export default class QuickstartStatsVisualization extends React.Component {
                       gapType={Grid.GAP_TYPE.SMALL}
                       className="validation-grid"
                     >
-                      <GridItem columnSpan={2}>
-                        {" "}
-                        <svg
-                          class="invalid-x"
-                          xmlns="http://www.w3.org/2000/svg"
-                          viewbox="0 0 40 40"
-                        >
-                          <path
-                            class="close-x"
-                            d="M 10,10 L 30,30 M 30,10 L 10,30"
-                          />
-                        </svg>
-                      </GridItem>
-                      <GridItem columnSpan={10}>
-                        <h2
-                          style={{
-                            color: "#017C86",
-                            fontWeight: 500,
-                          }}
-                        >
-                          Dashboards/Alerts
-                        </h2>
-                      </GridItem>
-                      <GridItem columnSpan={2}>
-                        {" "}
-                        <svg
-                          class="invalid-x"
-                          xmlns="http://www.w3.org/2000/svg"
-                          viewbox="0 0 40 40"
-                        >
-                          <path
-                            class="close-x"
-                            d="M 10,10 L 30,30 M 30,10 L 10,30"
-                          />
-                        </svg>
-                      </GridItem>
-                      <GridItem columnSpan={10}>
-                        <h2
-                          style={{
-                            color: "#017C86",
-                            fontWeight: 500,
-                          }}
-                        >
-                          Targeted Install
-                        </h2>
-                      </GridItem>
-                      <GridItem columnSpan={2}>
-                        {" "}
-                        <svg
-                          class="checkmark"
-                          xmlns="http://www.w3.org/2000/svg"
-                          viewBox="0 0 40 40"
-                        >
-                          <path
-                            class="checkmark__check"
-                            fill="none"
-                            d="M14.1 27.2l7.1 7.2 16.7-16.8"
-                          />
-                        </svg>
-                      </GridItem>
+                      {this.checkLogo()}
                       <GridItem columnSpan={10}>
                         <h2
                           style={{
@@ -563,28 +457,40 @@ export default class QuickstartStatsVisualization extends React.Component {
                           Documentation Link
                         </h2>
                       </GridItem>
+                      {this.xLogo()}
+                      <GridItem columnSpan={10}>
+                        <h2
+                          style={{
+                            color: "#017C86",
+                            fontWeight: 500,
+                          }}
+                        >
+                          Dashboards/Alerts
+                        </h2>
+                      </GridItem>
+                      {this.xLogo()}
+                      <GridItem columnSpan={10}>
+                        <h2
+                          style={{
+                            color: "#017C86",
+                            fontWeight: 500,
+                          }}
+                        >
+                          Targeted Install
+                        </h2>
+                      </GridItem>
                     </Grid>
                     <CardSection>
                       <CardSectionHeader>
                         <h1>{scenarioFour.length} Quickstarts</h1>
-                        <h4>{scenarioFourNr.length} with author New Relic</h4>
+                        <h4>
+                          {scenarioFourNr.length} with author{" "}
+                          <Badge type={Badge.TYPE.INFO}>New Relic</Badge>
+                        </h4>
                       </CardSectionHeader>
-                      <CardSectionBody>
-                        <Card collapsible collapsed>
-                          <CardHeader title="See All" />
-                          <CardBody>
-                            <List>
-                              {scenarioFour.map((qs) => (
-                                <ListItem>
-                                  <Link to={qs.packUrl}>{qs.name}</Link>
-                                </ListItem>
-                              ))}
-                            </List>
-                          </CardBody>
-                        </Card>
-                      </CardSectionBody>
                     </CardSection>
                     <CardSection></CardSection>
+                    {this.mostClicked(scenarioFour)}
                   </CardBody>
                 </Card>
               </GridItem>
