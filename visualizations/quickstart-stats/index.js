@@ -30,6 +30,7 @@ import {
 import ComponentStats from "../../nerdlets/component-stats/ComponentStats";
 
 const TESSEN_ACCOUNT_ID = 1002319;
+const OS_ENG_ACCOUNT_ID = 10827034;
 export default class QuickstartStatsVisualization extends React.Component {
   // Custom props you wish to be configurable in the UI must also be defined in
   // the nr1.json file for the visualization. See docs for more details.
@@ -111,7 +112,7 @@ export default class QuickstartStatsVisualization extends React.Component {
     );
   };
 
-  mostClicked = (quickstarts) => {
+  mostClickedInternal = (quickstarts) => {
     const ids = quickstarts.map((qs) => {
       return qs.id
     })
@@ -121,8 +122,9 @@ export default class QuickstartStatsVisualization extends React.Component {
     }, "")
     const nrql = "FROM TessenAction SELECT count(*) AS 'TOP 10 (INTERNAL)' WHERE listingId IN (" 
       + idString.substring(1,) + ") AND eventName = 'DEVEX_New Relic IO_listingClicked' AND listingType = 'quickstart' facet listingName SINCE '2021-09-29 00:00:00+0100' LIMIT 10"
-    console.log(nrql)
-    return (
+      console.log(nrql)
+      
+      return (
       <NrqlQuery
         accountId={TESSEN_ACCOUNT_ID}
         query={nrql}
@@ -137,10 +139,87 @@ export default class QuickstartStatsVisualization extends React.Component {
           }
 
           return (
+            <><HeadingText>TOP 10 (INTERNAL)</HeadingText>
             <BarChart
               accountId={TESSEN_ACCOUNT_ID}
               data={filtered}
-            />
+            /></>
+          );
+        }}
+      </NrqlQuery>
+    );
+  };
+  mostClickedExternal = (quickstarts) => {
+    const names = quickstarts.map((qs) => {
+      return qs.name
+    })
+    const nameString = names.reduce((acc, name) => {
+      acc += ','
+      return acc += `'${name}'`
+    }, "")
+    const nrql = "FROM TessenAction SELECT count(*) AS 'TOP 10 (EXTERNAL)' WHERE quickstartName IN (" 
+      + nameString.substring(1,) + ") AND eventName = 'TDEV_QuickstartClick_instantObservability' facet quickstartName SINCE '2021-09-29 00:00:00+0100' LIMIT 10"
+    console.log(nrql)
+
+      return (
+      <NrqlQuery
+        accountId={TESSEN_ACCOUNT_ID}
+        query={nrql}
+      >
+        {({ data }) => {
+          let filtered;
+          if (data) {
+            // change colors to a nice pink.
+            console.log(data)
+            console.log(`yes`)
+            filtered = data.filter(({ metadata }) => (metadata.name !== "Other"))
+          }
+
+          return (
+            <><HeadingText>TOP 10 (EXTERNAL)</HeadingText>
+            <BarChart
+              accountId={TESSEN_ACCOUNT_ID}
+              data={filtered}
+            /></>
+          );
+        }}
+      </NrqlQuery>
+    );
+  };
+
+  mostFailedInstall = (quickstarts) => {
+    const names = quickstarts.map((qs) => {
+      return qs.name
+    })
+    const nameString = names.reduce((acc, name) => {
+      acc += ','
+      return acc += `'${name}'`
+    }, "")
+     
+
+    const nrql = "FROM PackInstallEvent SELECT count(*) WHERE `status` = 'INSTALL_SUCCESS' AND packName IN (" 
+      + nameString.substring(1,) + ") AND email NOT LIKE '%newrelic.com' AND tags.Environment = 'production' or tags.Environment = 'eu-production' FACET packName SINCE '2021-09-29 00:00:00+0100' LIMIT 10"
+    console.log(nrql)
+    return (
+      <NrqlQuery
+        accountId={OS_ENG_ACCOUNT_ID}
+        query={nrql}
+      >
+        {({ data }) => {
+          let filtered;
+          if (data) {
+            // change colors to a nice pink.
+            console.log(data)
+            console.log(`yes`)
+            filtered = data.filter(({ metadata }) => (metadata.name !== "Other"))
+          }
+
+          return (
+            <><HeadingText>Most Installed</HeadingText>
+            <BarChart
+              accountId={TESSEN_ACCOUNT_ID}
+              data={filtered}
+            /></>
           );
         }}
       </NrqlQuery>
@@ -311,7 +390,11 @@ export default class QuickstartStatsVisualization extends React.Component {
                       </CardSectionHeader>
                     </CardSection>
                     <CardSection></CardSection>
-                    {this.mostClicked(scenarioOne)}
+                    {this.mostClickedInternal(scenarioOne)}
+                    <CardSection></CardSection>
+                    {this.mostClickedExternal(scenarioOne)}
+                    <CardSection></CardSection>
+                    {this.mostFailedInstall(scenarioOne)}
                   </CardBody>
                 </Card>
               </GridItem>
@@ -374,7 +457,11 @@ export default class QuickstartStatsVisualization extends React.Component {
                       </CardSectionHeader>
                     </CardSection>
                     <CardSection></CardSection>
-                    {this.mostClicked(scenarioTwo)}
+                    {this.mostClickedInternal(scenarioTwo)}
+                    <CardSection></CardSection>
+                    {this.mostClickedExternal(scenarioTwo)}
+                    <CardSection></CardSection>
+                    {this.mostFailedInstall(scenarioTwo)}
                   </CardBody>
                 </Card>
               </GridItem>
@@ -427,7 +514,11 @@ export default class QuickstartStatsVisualization extends React.Component {
                       </CardSectionHeader>
                     </CardSection>
                     <CardSection></CardSection>
-                    {this.mostClicked(scenarioThree)}
+                    {this.mostClickedInternal(scenarioThree)}
+                    <CardSection></CardSection>
+                    {this.mostClickedExternal(scenarioThree)}
+                    <CardSection></CardSection>
+                    {this.mostFailedInstall(scenarioThree)}
                   </CardBody>
                 </Card>
               </GridItem>
@@ -490,7 +581,9 @@ export default class QuickstartStatsVisualization extends React.Component {
                       </CardSectionHeader>
                     </CardSection>
                     <CardSection></CardSection>
-                    {this.mostClicked(scenarioFour)}
+                    {this.mostClickedInternal(scenarioFour)}
+                    <CardSection></CardSection>
+                    {this.mostClickedExternal(scenarioFour)}
                   </CardBody>
                 </Card>
               </GridItem>
