@@ -113,15 +113,15 @@ export default class QuickstartStatsVisualization extends React.Component {
   };
 
   mostClickedInternal = (quickstarts) => {
-    const ids = quickstarts.map((qs) => {
-      return qs.id
+    const names = quickstarts.map((qs) => {
+      return qs.name
     })
-    const idString = ids.reduce((acc, id) => {
+    const nameString = names.reduce((acc, name) => {
       acc += ','
-      return acc += `'${id}'`
+      return acc += `'${name}'`
     }, "")
-    const nrql = "FROM TessenAction SELECT count(*) AS 'TOP 10 (INTERNAL)' WHERE listingId IN (" 
-      + idString.substring(1,) + ") AND eventName = 'DEVEX_New Relic IO_listingClicked' AND listingType = 'quickstart' facet listingName SINCE '2021-09-29 00:00:00+0100' LIMIT 10"
+    const nrql = "FROM TessenAction SELECT count(*) AS 'TOP 10 (INTERNAL)' WHERE quickstartName IN (" 
+      + nameString.substring(1,) + ") AND eventName = 'DEVEN_Quickstart Details_pageView' facet quickstartName SINCE '2021-09-29 00:00:00+0100' LIMIT 10"
       console.log(nrql)
       
       return (
@@ -139,7 +139,7 @@ export default class QuickstartStatsVisualization extends React.Component {
           }
 
           return (
-            <><HeadingText>TOP 10 (INTERNAL)</HeadingText>
+            <><HeadingText>TOP 10 PageViews (I/O Marketplace)</HeadingText>
             <BarChart
               accountId={TESSEN_ACCOUNT_ID}
               data={filtered}
@@ -176,7 +176,7 @@ export default class QuickstartStatsVisualization extends React.Component {
           }
 
           return (
-            <><HeadingText>TOP 10 (EXTERNAL)</HeadingText>
+            <><HeadingText>TOP 10 PageViews (Public Catalog)</HeadingText>
             <BarChart
               accountId={TESSEN_ACCOUNT_ID}
               data={filtered}
@@ -187,7 +187,7 @@ export default class QuickstartStatsVisualization extends React.Component {
     );
   };
 
-  mostFailedInstall = (quickstarts) => {
+  mostSuccessfulInstall = (quickstarts) => {
     const names = quickstarts.map((qs) => {
       return qs.name
     })
@@ -215,7 +215,45 @@ export default class QuickstartStatsVisualization extends React.Component {
           }
 
           return (
-            <><HeadingText>Most Installed</HeadingText>
+            <><HeadingText>Most Successful Installs</HeadingText>
+            <BarChart
+              accountId={OS_ENG_ACCOUNT_ID}
+              data={filtered}
+            /></>
+          );
+        }}
+      </NrqlQuery>
+    );
+  };
+  mostInstalledDocsOnly = (quickstarts) => {
+    const names = quickstarts.map((qs) => {
+      return qs.name
+    })
+    const nameString = names.reduce((acc, name) => {
+      acc += ','
+      return acc += `'${name}'`
+    }, "")
+     
+
+    const nrql = "FROM TessenAction SELECT count(*) WHERE  eventName = 'DEVEN_Quickstart Details_clickInstall' AND quickstartName != '' AND quickstartName IN (" 
+      + nameString.substring(1,) + ") FACET quickstartName SINCE '2021-09-29 00:00:00+0100' LIMIT 10"
+    console.log(nrql)
+    return (
+      <NrqlQuery
+        accountId={TESSEN_ACCOUNT_ID}
+        query={nrql}
+      >
+        {({ data }) => {
+          let filtered;
+          if (data) {
+            // change colors to a nice pink.
+            console.log(data)
+            console.log(`yes`)
+            filtered = data.filter(({ metadata }) => (metadata.name !== "Other"))
+          }
+
+          return (
+            <><HeadingText>Most Install Clicks (Docs Only)</HeadingText>
             <BarChart
               accountId={TESSEN_ACCOUNT_ID}
               data={filtered}
@@ -394,7 +432,7 @@ export default class QuickstartStatsVisualization extends React.Component {
                     <CardSection></CardSection>
                     {this.mostClickedExternal(scenarioOne)}
                     <CardSection></CardSection>
-                    {this.mostFailedInstall(scenarioOne)}
+                    {this.mostSuccessfulInstall(scenarioOne)}
                   </CardBody>
                 </Card>
               </GridItem>
@@ -461,7 +499,7 @@ export default class QuickstartStatsVisualization extends React.Component {
                     <CardSection></CardSection>
                     {this.mostClickedExternal(scenarioTwo)}
                     <CardSection></CardSection>
-                    {this.mostFailedInstall(scenarioTwo)}
+                    {this.mostSuccessfulInstall(scenarioTwo)}
                   </CardBody>
                 </Card>
               </GridItem>
@@ -518,7 +556,7 @@ export default class QuickstartStatsVisualization extends React.Component {
                     <CardSection></CardSection>
                     {this.mostClickedExternal(scenarioThree)}
                     <CardSection></CardSection>
-                    {this.mostFailedInstall(scenarioThree)}
+                    {this.mostSuccessfulInstall(scenarioThree)}
                   </CardBody>
                 </Card>
               </GridItem>
@@ -584,6 +622,8 @@ export default class QuickstartStatsVisualization extends React.Component {
                     {this.mostClickedInternal(scenarioFour)}
                     <CardSection></CardSection>
                     {this.mostClickedExternal(scenarioFour)}
+                    <CardSection></CardSection>
+                    {this.mostInstalledDocsOnly(scenarioFour)}
                   </CardBody>
                 </Card>
               </GridItem>
