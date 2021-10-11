@@ -26,6 +26,9 @@ import {
   CardSectionHeader,
   BarChart,
   NrqlQuery,
+  Tooltip,
+  Icon,
+  navigation,
 } from "nr1";
 import ComponentStats from "../../nerdlets/component-stats/ComponentStats";
 
@@ -114,36 +117,56 @@ export default class QuickstartStatsVisualization extends React.Component {
 
   mostClickedInternal = (quickstarts) => {
     const names = quickstarts.map((qs) => {
-      return qs.name
-    })
+      return qs.name;
+    });
     const nameString = names.reduce((acc, name) => {
-      acc += ','
-      return acc += `'${name}'`
-    }, "")
-    const nrql = "FROM TessenAction SELECT count(*) AS 'TOP 10 (INTERNAL)' WHERE quickstartName IN (" 
-      + nameString.substring(1,) + ") AND eventName = 'DEVEN_Quickstart Details_pageView' facet quickstartName SINCE '2021-09-29 00:00:00+0100' LIMIT 10"
-      console.log(nrql)
-      
-      return (
-      <NrqlQuery
-        accountId={TESSEN_ACCOUNT_ID}
-        query={nrql}
-      >
+      acc += ",";
+      return (acc += `'${name}'`);
+    }, "");
+    const nrql =
+      "FROM TessenAction SELECT count(*) AS 'TOP 10 (INTERNAL)' WHERE quickstartName IN (" +
+      nameString.substring(1) +
+      ") AND eventName = 'DEVEN_Quickstart Details_pageView' facet quickstartName SINCE '2021-09-29 00:00:00+0100' LIMIT 10";
+    console.log(nrql);
+
+    return (
+      <NrqlQuery accountId={TESSEN_ACCOUNT_ID} query={nrql}>
         {({ data }) => {
           let filtered;
           if (data) {
             // change colors to a nice pink.
-            console.log(data)
-            console.log(`yes`)
-            filtered = data.filter(({ metadata }) => (metadata.name !== "Other"))
+            console.log(data);
+            console.log(`yes`);
+            filtered = data.filter(({ metadata }) => metadata.name !== "Other");
           }
-
+          const location = navigation.getOpenStackedNerdletLocation({
+            id: "data-exploration.query-builder",
+            UrlStateOptions: { replaceHistory: true },
+            urlState: {
+              initialQueries: [
+                {
+                  accountId: TESSEN_ACCOUNT_ID,
+                  nrql,
+                },
+              ],
+            },
+          });
           return (
-            <><HeadingText>TOP 10 PageViews (I/O Marketplace)</HeadingText>
-            <BarChart
-              accountId={TESSEN_ACCOUNT_ID}
-              data={filtered}
-            /></>
+            <>
+              <HeadingText>
+                TOP 10 PageViews (I/O Marketplace){"  "}
+                <Tooltip text="View the NRQL Query">
+                  <Button
+                    type={Button.TYPE.PRIMARY}
+                    to={location}
+                    iconType={
+                      Button.ICON_TYPE.DOCUMENTS__DOCUMENTS__FILE__A_ADD
+                    }
+                  />
+                </Tooltip>
+              </HeadingText>
+              <BarChart accountId={TESSEN_ACCOUNT_ID} data={filtered} />
+            </>
           );
         }}
       </NrqlQuery>
@@ -151,36 +174,56 @@ export default class QuickstartStatsVisualization extends React.Component {
   };
   mostClickedExternal = (quickstarts) => {
     const names = quickstarts.map((qs) => {
-      return qs.name
-    })
+      return qs.name;
+    });
     const nameString = names.reduce((acc, name) => {
-      acc += ','
-      return acc += `'${name}'`
-    }, "")
-    const nrql = "FROM TessenAction SELECT count(*) AS 'TOP 10 (EXTERNAL)' WHERE quickstartName IN (" 
-      + nameString.substring(1,) + ") AND eventName = 'TDEV_QuickstartClick_instantObservability' facet quickstartName SINCE '2021-09-29 00:00:00+0100' LIMIT 10"
-    console.log(nrql)
+      acc += ",";
+      return (acc += `'${name}'`);
+    }, "");
+    const nrql =
+      "FROM TessenAction SELECT count(*) AS 'TOP 10 (EXTERNAL)' WHERE quickstartName IN (" +
+      nameString.substring(1) +
+      ") AND eventName = 'TDEV_QuickstartClick_instantObservability' facet quickstartName SINCE '2021-09-29 00:00:00+0100' LIMIT 10";
+    console.log(nrql);
 
-      return (
-      <NrqlQuery
-        accountId={TESSEN_ACCOUNT_ID}
-        query={nrql}
-      >
+    return (
+      <NrqlQuery accountId={TESSEN_ACCOUNT_ID} query={nrql}>
         {({ data }) => {
           let filtered;
           if (data) {
             // change colors to a nice pink.
-            console.log(data)
-            console.log(`yes`)
-            filtered = data.filter(({ metadata }) => (metadata.name !== "Other"))
+            console.log(data);
+            console.log(`yes`);
+            filtered = data.filter(({ metadata }) => metadata.name !== "Other");
           }
-
+          const location = navigation.getOpenStackedNerdletLocation({
+            id: "data-exploration.query-builder",
+            UrlStateOptions: { replaceHistory: true },
+            urlState: {
+              initialQueries: [
+                {
+                  accountId: TESSEN_ACCOUNT_ID,
+                  nrql,
+                },
+              ],
+            },
+          });
           return (
-            <><HeadingText>TOP 10 PageViews (Public Catalog)</HeadingText>
-            <BarChart
-              accountId={TESSEN_ACCOUNT_ID}
-              data={filtered}
-            /></>
+            <>
+              <HeadingText>
+                TOP 10 PageViews (Public Catalog){"  "}
+                <Tooltip text="View the NRQL Query">
+                  <Button
+                    type={Button.TYPE.PRIMARY}
+                    to={location}
+                    iconType={
+                      Button.ICON_TYPE.INTERFACE__INFO__HELP
+                    }
+                  />
+                </Tooltip>
+              </HeadingText>
+              <BarChart accountId={TESSEN_ACCOUNT_ID} data={filtered} />
+            </>
           );
         }}
       </NrqlQuery>
@@ -189,37 +232,56 @@ export default class QuickstartStatsVisualization extends React.Component {
 
   mostSuccessfulInstall = (quickstarts) => {
     const names = quickstarts.map((qs) => {
-      return qs.name
-    })
+      return qs.name;
+    });
     const nameString = names.reduce((acc, name) => {
-      acc += ','
-      return acc += `'${name}'`
-    }, "")
-     
+      acc += ",";
+      return (acc += `'${name}'`);
+    }, "");
 
-    const nrql = "FROM PackInstallEvent SELECT count(*) WHERE `status` = 'INSTALL_SUCCESS' AND packName IN (" 
-      + nameString.substring(1,) + ") AND email NOT LIKE '%newrelic.com' AND tags.Environment = 'production' or tags.Environment = 'eu-production' FACET packName SINCE '2021-09-29 00:00:00+0100' LIMIT 10"
-    console.log(nrql)
+    const nrql =
+      "FROM PackInstallEvent SELECT count(*) WHERE `status` = 'INSTALL_SUCCESS' AND packName IN (" +
+      nameString.substring(1) +
+      ") AND email NOT LIKE '%newrelic.com' AND tags.Environment = 'production' or tags.Environment = 'eu-production' FACET packName SINCE '2021-09-29 00:00:00+0100' LIMIT 10";
+    console.log(nrql);
     return (
-      <NrqlQuery
-        accountId={OS_ENG_ACCOUNT_ID}
-        query={nrql}
-      >
+      <NrqlQuery accountId={OS_ENG_ACCOUNT_ID} query={nrql}>
         {({ data }) => {
           let filtered;
           if (data) {
             // change colors to a nice pink.
-            console.log(data)
-            console.log(`yes`)
-            filtered = data.filter(({ metadata }) => (metadata.name !== "Other"))
+            console.log(data);
+            console.log(`yes`);
+            filtered = data.filter(({ metadata }) => metadata.name !== "Other");
           }
-
+          const location = navigation.getOpenStackedNerdletLocation({
+            id: "data-exploration.query-builder",
+            UrlStateOptions: { replaceHistory: true },
+            urlState: {
+              initialQueries: [
+                {
+                  accountId: OS_ENG_ACCOUNT_ID,
+                  nrql,
+                },
+              ],
+            },
+          });
           return (
-            <><HeadingText>Most Successful Installs</HeadingText>
-            <BarChart
-              accountId={OS_ENG_ACCOUNT_ID}
-              data={filtered}
-            /></>
+            <>
+              <HeadingText>
+                Most Successful Installs{"  "}
+                <Tooltip text="View the NRQL Query">
+                  <Button
+                    type={Button.TYPE.PRIMARY}
+                    to={location}
+                    iconType={
+                      Button.ICON_TYPE.INTERFACE__INFO__HELP
+                    }
+                  />
+                </Tooltip>
+              </HeadingText>
+              <BarChart accountId={OS_ENG_ACCOUNT_ID} data={filtered} />
+            </>
           );
         }}
       </NrqlQuery>
@@ -227,37 +289,56 @@ export default class QuickstartStatsVisualization extends React.Component {
   };
   mostInstalledDocsOnly = (quickstarts) => {
     const names = quickstarts.map((qs) => {
-      return qs.name
-    })
+      return qs.name;
+    });
     const nameString = names.reduce((acc, name) => {
-      acc += ','
-      return acc += `'${name}'`
-    }, "")
-     
+      acc += ",";
+      return (acc += `'${name}'`);
+    }, "");
 
-    const nrql = "FROM TessenAction SELECT count(*) WHERE  eventName = 'DEVEN_Quickstart Details_clickInstall' AND quickstartName != '' AND quickstartName IN (" 
-      + nameString.substring(1,) + ") FACET quickstartName SINCE '2021-09-29 00:00:00+0100' LIMIT 10"
-    console.log(nrql)
+    const nrql =
+      "FROM TessenAction SELECT count(*) WHERE  eventName = 'DEVEN_Quickstart Details_clickInstall' AND quickstartName != '' AND quickstartName IN (" +
+      nameString.substring(1) +
+      ") FACET quickstartName SINCE '2021-09-29 00:00:00+0100' LIMIT 10";
+    console.log(nrql);
     return (
-      <NrqlQuery
-        accountId={TESSEN_ACCOUNT_ID}
-        query={nrql}
-      >
+      <NrqlQuery accountId={TESSEN_ACCOUNT_ID} query={nrql}>
         {({ data }) => {
           let filtered;
           if (data) {
             // change colors to a nice pink.
-            console.log(data)
-            console.log(`yes`)
-            filtered = data.filter(({ metadata }) => (metadata.name !== "Other"))
+            console.log(data);
+            console.log(`yes`);
+            filtered = data.filter(({ metadata }) => metadata.name !== "Other");
           }
-
+          const location = navigation.getOpenStackedNerdletLocation({
+            id: "data-exploration.query-builder",
+            UrlStateOptions: { replaceHistory: true },
+            urlState: {
+              initialQueries: [
+                {
+                  accountId: TESSEN_ACCOUNT_ID,
+                  nrql,
+                },
+              ],
+            },
+          });
           return (
-            <><HeadingText>Most Install Clicks (Docs Only)</HeadingText>
-            <BarChart
-              accountId={TESSEN_ACCOUNT_ID}
-              data={filtered}
-            /></>
+            <>
+              <HeadingText>
+                Most Install Clicks (Docs Only){"  "}
+                <Tooltip text="View the NRQL Query">
+                  <Button
+                    type={Button.TYPE.PRIMARY}
+                    to={location}
+                    iconType={
+                      Button.ICON_TYPE.INTERFACE__INFO__HELP
+                    }
+                  />
+                </Tooltip>
+              </HeadingText>
+              <BarChart accountId={TESSEN_ACCOUNT_ID} data={filtered} />
+            </>
           );
         }}
       </NrqlQuery>
